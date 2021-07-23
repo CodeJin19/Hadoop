@@ -99,3 +99,129 @@ awk는 행 기반의 데이터 처리를 위한 유닉스 툴이다.
 <br>
 
 ### JAVA MapReduce
+
+그렇다면 JAVA로 구현한 MapReduce를 살펴보자.
+
+<br>
+
+#### JAVA Mapper
+
+```JAVA
+import java.io.IOException;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+
+public class MaxTemperatureMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+   private static final int MISSING = 9999;
+
+   @Override
+   public void map(LongWritable key, Text value, Context context) throws IOExcepion, InterruptedException {
+      String line = value.toString();
+      String year = line.substring(15, 19);
+      int airTemperature;
+
+      if(line.charAt(87) =='+') {
+         airTemperature = Integer.parseInt(line.substring(88, 92));
+      } else {
+         airTemperature = Integer.parseInt(line.substring(87, 92));
+      }
+
+      String quality = line.substring(92, 93);
+
+      if(airTemperature != MISSING && quality.matches("[01459]")) {
+         context.write(new Text(year), new IntWritable(airTemperature));
+      }
+   }
+}
+```
+
+위의 코드는 이 예제의 Mapper를 JAVA로 구현한 코드로, 원본은 [이곳](https://github.com/tomwhite/hadoop-book/blob/master/ch02-mr-intro/src/main/java/MaxTemperatureMapper.java)에서 확인할 수 있다.
+
+1. 이 코드는 추상 메서드 map을 정의하는 Mapper 클래스를 상속받는다
+
+2. Mapper클래스는 입력키와 입력값, 출력키와 출력값 네 가지의 매개변수를 갖는다
+
+3. map 메서드에서 입력키로 key를, 입력값으로 value를 받는다
+
+4. value를 String형으로 변환한 뒤, substring을 통해 연도와 기온, 퀄리티를 추출한다
+
+5. 추출한 데이터의 적합성을 검사한 뒤, 출력값인 context에 적절히 대입한다
+
+<br>
+
+#### JAVA Reducer
+
+```JAVA
+import java.io.IOException;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
+
+public class MaxTemperatureReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+   @Override
+   public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+      int maxValue = Integer.MIN_VALUE;
+
+      for(IntWritable value : values) {
+         maxValue = Math.max(maxValue, value.get());
+      }
+
+      context.wrtie(key, new IntWritable(maxValue));
+   }
+}
+```
+
+위의 코드는 이 예제의 Mapper를 JAVA로 구현한 코드로, 원본은 [이곳](https://github.com/tomwhite/hadoop-book/blob/master/ch02-mr-intro/src/main/java/MaxTemperatureReducer.java)에서 확인할 수 있다.
+
+1. 이 코드는 추상 메서드 reduce를 정의하는 Reducer 클래스를 상속받는다
+
+2. Reducer클래스는 입력키와 입력값, 출력키와 출력값 네 가지의 매개변수를 갖는다
+
+3. reduce 메서드에서 입력키로 key를, 입력값으로 value를 받는다
+
+4. 맵과 리듀스 사이의 맵리듀스 프레임워크에 의해 입력키로 연도를, 입력값으로 연도별 기온들을 받는다
+
+5. 입력값들 중 최고기온을 찾아 연도와 함께 출력값인 context에 적절히 대입한다
+
+<br>
+
+#### JAVA Main
+
+```JAVA
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.iput.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class MaxTemperature {
+   public static void main(String[] args) throws Exception {
+      if(args.length != 2) {
+         System.err.println("Usage: MaxTemperature <input path> <output path>");
+         System.exit(-1);
+      }
+
+      Job job = new Job();
+      job.setJarByClass(MaxTemperature.class);
+      job.setJobName("Max temperature");
+
+      FileInputFormat.addInputPath(job, new Path(args[0]));
+      FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+      job.setMapperClass(MaxTemperatureMapper.class);
+      job.setReducerClass(MaxTemperatureMapper.class);
+
+      job.setOutputKeyClass(Text.class);
+      job.setOutputValueClass(IntWritable.class);
+
+      System.exit(job.waitForCompletion(true) ? 0 : 1);
+   }
+}
+```
+
