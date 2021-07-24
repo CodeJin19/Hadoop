@@ -10,6 +10,18 @@
 
 <br>
 
+## Table of Contents
+
+[Weather Data Set](##Weather-Data-Set)
+
+[Analyzing the Data with Unix Tools](##Analyzing-the-Data-with-Unix-Tools)
+
+[Analyzing the Data with Hadoop](##Analyzing-the-Data-with-Hadoop)
+
+[Scailing Out](##Scailing-Out)
+
+<br>
+
 ## Weather Data Set
 
 간단한 예제로 기상 데이터 셋을 활용하여 연도에 따른 기온 데이터를 입력받아, 연도별 최고 기온을 찾는 예제를 진행해보자.
@@ -224,4 +236,40 @@ public class MaxTemperature {
    }
 }
 ```
+
+1. Job 객체는 잡 명세서를 작성한다
+
+2. 하둡 클러스터에서는 잡을 실행하기 전에 코드를 JAR 파일로 묶어야 한다
+
+   - setJarByClass 메서드를 사용하면 하둡은 해당 클래스를 포함한 관련 JAR 파일을 찾아서 클러스터에 배치해준다
+
+   - 혹은 JAR 파일의 이름으로 지정하는 방법도 있다
+
+3. FileInputFormat의 addInputPath 메서드로 job의 입력 경로를 지정한다
+
+4. FileOutputFormat의 setOutputPath 메서드로 job의 출력 경로를 지정한다
+
+   - 이 때, 출력 경로로 지정한 디렉토리는 job을 수행하는 시점에 존재하지 않아야 한다
+
+   - job을 수행하는 시점에 해당 디렉토리가 존재하는 경우 에러가 발생한다
+
+5. setMapperClass, setReducerClass 메서드로 맵과 리듀스를 지정한다
+
+6. waitForCompletion 메서드로 job이 끝날 때까지 기다린 뒤, 무사히 마쳤다면 본 시스템을 정상 종료한다
+
+<br>
+
+## Scailing Out
+
+위 예제는 쉬운 진행을 위해 로컬 파일시스템 환경에서 데이터를 처리했다. (그만큼 크기도 작았다)
+
+프로젝트를 확장하려면 전체 데이터를 키워야하며 이를 관리하기 위해서는 HDFS(Hadoop Distributed File System)라는 분산 파일시스템에 데이터를 저장해야 한다.
+
+하둡은 데이터의 일부분이 저장된 클러스터의 각 머신에서 매리듀스 프로그램을 실행한다.
+
+그리고 이를 위해 하둡은 YARN이라는 하둡 자원 관리 시스템을 이용한다.
+
+<br>
+
+### Data Flow
 
