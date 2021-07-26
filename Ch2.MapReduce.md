@@ -12,13 +12,13 @@
 
 ## Table of Contents
 
-[Weather Data Set](##Weather-Data-Set)
+[Weather Data Set](#Weather-Data-Set)
 
-[Analyzing the Data with Unix Tools](##Analyzing-the-Data-with-Unix-Tools)
+[Analyzing the Data with Unix Tools](#Analyzing-the-Data-with-Unix-Tools)
 
-[Analyzing the Data with Hadoop](##Analyzing-the-Data-with-Hadoop)
+[Analyzing the Data with Hadoop](#Analyzing-the-Data-with-Hadoop)
 
-[Scailing Out](##Scailing-Out)
+[Scailing Out](#Scailing-Out)
 
 <br>
 

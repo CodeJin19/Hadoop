@@ -2,13 +2,13 @@
 
 ## Table of Contents
 
-[Data](##Data)
+[Data](#Data)
 
-[Data Storage](##Data-Storage)
+[Data Storage](#Data-Storage)
 
-[Querying All Your Data](##Querying-All-Your-Data)
+[Querying All Your Data](#Querying-All-Your-Data)
 
-[Beyond Batch](##Beyond-Batch)
+[Beyond Batch](#Beyond-Batch)
 
 <br>
 
